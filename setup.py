@@ -1,34 +1,33 @@
 """
-Copyright (C) 2020-2021 Dominik Lentrodt
+Copyright (C) 2022 Dominik Lentrodt
 
-This file is part of pygreenfn.
+This file is part of pyrot.
 
-pygreenfn is free software: you can redistribute it and/or modify
+pyrot is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-pygreenfn is distributed in the hope that it will be useful,
+pyrot is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with pygreenfn.  If not, see <http://www.gnu.org/licenses/>.
+along with pyrot.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
 from setuptools import setup
 
-package_data = dict(pygreenfn=['*.py',
-                               'pygreenfn/*.py',
-                               'pygreenfn_pol/*.py',
-                               ])
+package_data = dict(pyrot=['*.py',
+                           'pyrot/*.py',
+                           ])
 
-setup(name='pygreenfn',
+setup(name='pyrot',
       version='0.0.0',
       author='Dominik Lentrodt',
-      author_email='dominik.lentrodt@mpi-hd.mpg.de',
-      packages=['pygreenfn', 'pygreenfn_pol'],
+      author_email='dominik@lentrodt.com',
+      packages=['pyrot'],
       package_data=package_data
     )

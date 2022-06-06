@@ -397,17 +397,13 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
     on_top = [None] * len(atoms_params)
     # False -> lonly atom; index list -> indices of other atoms are on top; True -> appears in index list of a previous atom
     for i, atom_params in enumerate(atoms_params):
-        #print((on_top[i] is None))
         if on_top[i] is None:
             on_top_layer_idxs = []
             atom_pos_1 = atom_params[0]
             any_redunant = False
             for j, atom_params2 in enumerate(atoms_params):
-                print(i, j)
                 if j>i:
-                    print(" ", i, j)
                     atom_pos_2 = atom_params2[0]
-                    print("{}, {}, {}, {}".format(i, j, atom_pos_1, atom_pos_2))
                     if np.abs(atom_pos_1-atom_pos_2)<4.*t_small:
                     # hardcoded threshold; all closer atoms are considered to be on top of each other
                         any_redunant = True
@@ -417,13 +413,9 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
                 on_top[i] = on_top_layer_idxs
             else:
                 on_top[i] = False
-    print("on_top: {}".format(on_top))
 
     for a_i, atom_params in enumerate(atoms_params):
         if not on_top[a_i] == True:
-            #print("N: {}".format(Nc))
-            #print("T: {}".format(Tc))
-
             atom_pos, atom_dPol, atom_om, atom_gamma = atom_params
             atoms_pos.append(atom_pos)
 
@@ -468,7 +460,6 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
                             * (-1.0)/(1j*gamma_eff + 2.0*(k-atom_om))
 
             if not (type(on_top[a_i]) == bool):
-                print('Addings susceptibilities!')
                 for j in on_top[a_i]:
                     atom_pos_j, atom_dPol_j, atom_om_j, atom_gamma_j = atoms_params[j]
                     gamma_eff_j = atom_gamma_j
@@ -505,9 +496,6 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
 
             Nc = copy.deepcopy(N_int)
             Tc = copy.deepcopy(T_int)
-
-    print("N: {}".format(Nc))
-    print("T: {}".format(Tc))
 
     return N_int, T_int, parratt_maxwell1D_matrix(N_int, T_int, k, phase_zero_offset=phase_zero_offset)
 
