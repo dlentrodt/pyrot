@@ -1,0 +1,26 @@
+# Python byte-compiled files
+__pycache__/
+*.pyc
+
+# Jupyter stuff
+*.ipynb_checkpoints
+
+# Mac stuff
+.DS_Store
+
+# Latex auxiliaries
+*.aux
+*.blg
+*.log
+*.run.xml
+*-blx.bib
+*.bbl
+*.synctex.gz
+*.out
+*.pdf
+*.ps
+*.dvi
+*.tex~
+
+# File backups
+*~
