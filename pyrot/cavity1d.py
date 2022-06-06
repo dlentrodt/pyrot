@@ -409,6 +409,7 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
                     atom_pos_2 = atom_params2[0]
                     print("{}, {}, {}, {}".format(i, j, atom_pos_1, atom_pos_2))
                     if np.abs(atom_pos_1-atom_pos_2)<4.*t_small:
+                    # hardcoded threshold; all closer atoms are considered to be on top of each other
                         any_redunant = True
                         on_top_layer_idxs.append(j)
                         on_top[j] = True
@@ -416,81 +417,94 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
                 on_top[i] = on_top_layer_idxs
             else:
                 on_top[i] = False
-    print(on_top)
+    print("on_top: {}".format(on_top))
 
-    for atom_params in atoms_params:
-        #print("N: {}".format(Nc))
-        #print("T: {}".format(Tc))
+    for a_i, atom_params in enumerate(atoms_params):
+        if not on_top[a_i] == True:
+            #print("N: {}".format(Nc))
+            #print("T: {}".format(Tc))
 
-        atom_pos, atom_dPol, atom_om, atom_gamma = atom_params
-        atoms_pos.append(atom_pos)
+            atom_pos, atom_dPol, atom_om, atom_gamma = atom_params
+            atoms_pos.append(atom_pos)
 
-        # find the index of the layer the atom is in and the position of the start of that layer:
-        t_cumul = 0.0
-        for i,t in enumerate(Tc[1:-1]):
-            t_cumul += t
-            if t_cumul>atom_pos:
-                t_cumul -= t
-                ind_atomLayer = i+1
-                n_atomLayer = Nc[i+1] # refractive index of the layer containing the atom
-                break
+            # find the index of the layer the atom is in and the position of the start of that layer:
+            t_cumul = 0.0
+            for i,t in enumerate(Tc[1:-1]):
+                t_cumul += t
+                if t_cumul>atom_pos:
+                    t_cumul -= t
+                    ind_atomLayer = i+1
+                    n_atomLayer = Nc[i+1] # refractive index of the layer containing the atom
+                    break
 
-        gamma_eff = atom_gamma
+            gamma_eff = atom_gamma
 
-        num_dens = 1.0/t_small     # "number density" -> simulates one atom smeared over simulated delta function
-        
-        ###################################################################
-        ### Linear dispersion theory formula ##############################
-        ###################################################################
-        if formula_option == 'Full':
-            '''
-            Version from my deriviation: does not assume the rotating-wave
-            approximation. The A^2 term is however neglected, since this
-            would involve an additional constant.
-            '''
-            susc_atom = -2.*atom_dPol**2 * num_dens*atom_om**3/(k**2-atom_om**2) \
-                         /(k**2)
-            n_atom = np.sqrt(1.0+0j + susc_atom)
-        elif formula_option == 'Standard':
-            '''
-            Standard version of the linear dispersion formula, e.g. from
-            lecture by J. Evers (Heidelberg) or from Roehlsberger 2004.
-            There are TWO approximations implicit here:
-                1. Rotating-wave approximation.
-                2. atom_om**2/k**2 ~ 1
-            Note that 2. already breaks in the multi-mode strong coupling
-            regime, where 1. often still holds.
-            Note also that n_atom = 1.0+0j + susc_atom/2.0
-            does not hold here because susc is large due to the thin layer/
-            single atom assumption.
-            '''
-            susc_atom = 2.0*atom_dPol**2 * num_dens \
-                        * (-1.0)/(1j*gamma_eff + 2.0*(k-atom_om))
-            n_atom = np.sqrt(1.0+0j + susc_atom)
+            num_dens = 1.0/t_small     # "number density" -> simulates one atom smeared over simulated delta function
             
-        ###################################################################
-        ### Assemble layer system #########################################
-        ###################################################################
+            ###################################################################
+            ### Linear dispersion theory formula ##############################
+            ###################################################################
+            if formula_option == 'Full':
+                '''
+                Version from TODO: does not assume the rotating-wave
+                approximation. The A^2 term is however neglected (see TODO).
+                '''
+                susc_atom = -2.*atom_dPol**2 * num_dens*atom_om**3/(k**2-atom_om**2) \
+                             /(k**2) # TODO: include gamma_eff here?!
+            elif formula_option == 'Rot. wave':
+                '''
+                Standard version of the linear dispersion formula, e.g. from
+                TODO.
+                There are TWO approximations implicit here:
+                    1. Rotating-wave approximation.
+                    2. atom_om**2/k**2 ~ 1
+                Note that 2. already breaks in the multi-mode strong coupling
+                regime, where 1. often still holds.
+                Note also that n_atom = 1.0+0j + susc_atom/2.0
+                does not hold here because susc is large due to the thin layer/
+                single atom assumption.
+                '''
+                susc_atom = 2.0*atom_dPol**2 * num_dens \
+                            * (-1.0)/(1j*gamma_eff + 2.0*(k-atom_om))
 
-        N_int = [None] * (len(Nc)+2)
-        T_int = [None] * (len(Tc)+2)
-        for i, (n, t) in enumerate(zip(N_int, T_int)):
-            if ind_atomLayer>i:
-                N_int[i] = Nc[i]
-                T_int[i] = Tc[i]
-            elif ind_atomLayer+2<i:
-                N_int[i] = Nc[i-2]
-                T_int[i] = Tc[i-2]
-            elif ind_atomLayer==i:
-                N_int[i]   = Nc[i]
-                N_int[i+2] = Nc[i]
-                T_int[i]   = atom_pos-t_cumul-t_small/2.0  # first surrounding layer
-                T_int[i+2] = Tc[i]-T_int[i]-t_small # second surrounding layer
-                N_int[i+1] = n_atom
-                T_int[i+1] = t_small 
+            if not (type(on_top[a_i]) == bool):
+                print('Addings susceptibilities!')
+                for j in on_top[a_i]:
+                    atom_pos_j, atom_dPol_j, atom_om_j, atom_gamma_j = atoms_params[j]
+                    gamma_eff_j = atom_gamma_j
+                    # add susceptibilities of atoms/transitions that are on top of each other.
+                    if formula_option == 'Full':
+                        susc_atom += -2.*atom_dPol_j**2 * num_dens*atom_om_j**3/(k**2-atom_om_j**2) \
+                                     /(k**2) # TODO: include gamma_eff here?!
+                    elif formula_option == 'Rot. wave':
+                        susc_atom += 2.0*atom_dPol_j**2 * num_dens \
+                                    * (-1.0)/(1j*gamma_eff_j + 2.0*(k-atom_om_j))
 
-        Nc = copy.deepcopy(N_int)
-        Tc = copy.deepcopy(T_int)
+            n_atom = np.sqrt(1.0+0j + susc_atom)
+                
+            ###################################################################
+            ### Assemble layer system #########################################
+            ###################################################################
+
+            N_int = [None] * (len(Nc)+2)
+            T_int = [None] * (len(Tc)+2)
+            for i, (n, t) in enumerate(zip(N_int, T_int)):
+                if ind_atomLayer>i:
+                    N_int[i] = Nc[i]
+                    T_int[i] = Tc[i]
+                elif ind_atomLayer+2<i:
+                    N_int[i] = Nc[i-2]
+                    T_int[i] = Tc[i-2]
+                elif ind_atomLayer==i:
+                    N_int[i]   = Nc[i]
+                    N_int[i+2] = Nc[i]
+                    T_int[i]   = atom_pos-t_cumul-t_small/2.0  # first surrounding layer
+                    T_int[i+2] = Tc[i]-T_int[i]-t_small # second surrounding layer
+                    N_int[i+1] = n_atom
+                    T_int[i+1] = t_small 
+
+            Nc = copy.deepcopy(N_int)
+            Tc = copy.deepcopy(T_int)
 
     print("N: {}".format(Nc))
     print("T: {}".format(Tc))
