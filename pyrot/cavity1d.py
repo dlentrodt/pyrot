@@ -110,57 +110,6 @@ class Cavity1d():
         plt.legend(loc=4,fontsize=8)
         plt.show()
 
-class CavityAtom1d(Cavity1d):
-
-    def __init__(self, n, t, atom_pos, atom_dpol, atom_om, atom_gamma):
-        self.atom_pos   =   atom_pos    # Position of the atom (measured relative to left cavity surface)
-        self.atom_dpol  =   atom_dpol   # dipole moment
-        self.atom_om    =   atom_om     # transition energy
-        self.atom_gamma =   atom_gamma  # spontaneous decay rate into non-radiative channels
-
-        ### collect into parameter list ###
-        self.atom_params = [atom_pos, atom_dpol, atom_om, atom_gamma]
-
-        super().__init__(n, t)
-
-    def linear_scattering_matrix(self, k, zero_offset=0.0):
-        _, _, result = linear_dispersion_scattering(k, self.n, self.t, self.atom_params, phase_zero_offset=-k*zero_offset)
-        return result
-
-    def linear_transmission_coefficient(self, k, input_from_right=False, zero_offset=0.0):
-        if input_from_right:
-            return self.linear_scattering_matrix(k, zero_offset=zero_offset)[1,1]
-        return self.linear_scattering_matrix(k, zero_offset=zero_offset)[0,0]
-
-    def linear_transmission_intensity(self, k, input_from_right=False, zero_offset=0.0):
-        return np.abs(self.linear_transmission_coefficient(k, input_from_right=input_from_right, zero_offset=zero_offset))**2
-
-    def linear_reflection_coefficient(self, k, input_from_right=False, zero_offset=0.0):
-        if input_from_right:
-            return self.linear_scattering_matrix(k, zero_offset=zero_offset)[1,0]
-        return self.linear_scattering_matrix(k, zero_offset=zero_offset)[0,1] # TODO: check order
-
-    def linear_reflection_intensity(self, k, input_from_right=False, zero_offset=0.0):
-        return np.abs(self.linear_reflection_coefficient(k, input_from_right=input_from_right, zero_offset=zero_offset))**2
-
-    def linear_layer_system_with_atom(self, k, zero_offset=0.0):
-        N, T, _ = linear_dispersion_scattering(k, self.n, self.t, self.atom_params, phase_zero_offset=-k*zero_offset)
-        return N, T
-
-    def draw_cav(self, depth):
-        N_depth = self.n_depth(depth)
-
-        plt.figure()
-        plt.xlabel('Depth')
-        plt.ylabel('Refractive index')
-        plt.title('Example cavity sketch')
-        plt.plot(depth, np.real(N_depth), '-', label='Re[N]')
-        plt.plot(depth, np.imag(N_depth), '-', label='Im[N]')
-        plt.axvline(self.atom_pos, color='k', dashes=[3,3], lw=1.0, label='atom position')
-        plt.autoscale(enable=True, axis='x', tight=True)
-        plt.legend(loc=4,fontsize=8)
-        plt.show()
-
 class CavityAtoms1d(Cavity1d):
 
     def __init__(self, n, t, atoms_params):
