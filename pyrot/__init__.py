@@ -1,29 +1,24 @@
 """
-pygreenfn
-=========
+Copyright (C) 2022 Dominik Lentrodt
 
-pygreenfn is a software package written in Python which can be used to 
-calculate Green functions, effective nuclear level schems and linear scattering
-observables for layered structures.
-See https://doi.org/10.1103/PhysRevResearch.2.023396 for the corresponding paper.
+This file is part of pyrot.
 
-
-Copyright (C) 2017-2019 Dominik Lentrodt
-
-pygreenfn is free software: you can redistribute it and/or modify
+pyrot is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-pygreenfn is distributed in the hope that it will be useful,
+pyrot is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with pygreenfn.  If not, see <http://www.gnu.org/licenses/>.
+along with pyrot.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 __version__ = '0.0.0'
 __author__ = 'Dominik Lentrodt'
 __license__ = 'GPLv3 or later'
+
+from .cavity1d import Cavity1d, CavityAtoms1d

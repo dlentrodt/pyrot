@@ -22,9 +22,6 @@ import copy
 import sys
 import time
 
-import warnings
-
-# math
 import math
 import numpy as np
 import numpy.linalg
@@ -34,41 +31,13 @@ import matplotlib.pylab as plt
 
 ################################################################################
 
-### helper functions ###
-
-def find_nearest_idx(array, value):
-    """
-    Find the closest element in an array and return the corresponding index.
-    """
-    array = np.asarray(array)
-    idx = (np.abs(array-value)).argmin()
-    return idx
-
-def find_nearest(array, value):
-    """
-    Find the closest element in an array and return the corresponding index.
-    """
-    array = np.asarray(array)
-    idx = (np.abs(array-value)).argmin()
-    return idx, array[idx]
-
-def progressBar(value, endvalue, bar_length=20):
-    """
-    Progress bar for loops
-    """
-    percent = float(value) / endvalue
-    arrow = '-' * int(round(percent * bar_length)-1) + '>'
-    spaces = ' ' * (bar_length - len(arrow))
-
-    sys.stdout.write("\rPercent: [{0}] {1}%".format(arrow + spaces, \
-                                                    int(round(percent * 100))))
-    sys.stdout.flush()
+### main classes ###
 
 class Cavity1d():
     def __init__(self, n, t):
         self.n = n
         self.t = t
-        self.r0 = 0.0 # default zero position of spatial axis at the left end of the cavity
+        self.r0 = 0.0 # default zero position of spatial axis: at the left end of the cavity
         if (self.t[0] != -1) or (self.t[-1] != -1):
             raise ValueError('First and last element of T must be set to -1. \
                 They indicate the spaces to the left and right of the cavity.')
@@ -177,10 +146,31 @@ class CavityAtoms1d(Cavity1d):
         plt.legend(loc=4,fontsize=8)
         plt.show()
 
+################################################################################
+### helper functions ###
 
+def find_nearest_idx(array, value):
+    """
+    Find the closest element in an array and return the corresponding index.
+    """
+    array = np.asarray(array)
+    idx = (np.abs(array-value)).argmin()
+    return idx
+
+def find_nearest(array, value):
+    """
+    Find the closest element in an array and return the corresponding index and value.
+    """
+    array = np.asarray(array)
+    idx = (np.abs(array-value)).argmin()
+    return idx, array[idx]
+
+################################################################################
 ### algorithmic functions ###
+
 def parratt_maxwell1D_matrix(N0, D0, kRange, phase_zero_offset=None):
-    """ Calculates the scattering matrix of an empty cavity (no atom, cavity alone).
+    """ Calculates the scattering matrix of an empty 1D cavity (no atom, cavity alone)
+        given by a refractive index profile of discrete layers.
         Input format:
         - N0: [N0, N1, N2, ..., NN, NN+1]; refractive indices of different layers,
                                            where N0,NN+1 is the space to the left/right,
@@ -231,9 +221,8 @@ def parratt_maxwell1D_matrix(N0, D0, kRange, phase_zero_offset=None):
 
 def parratt_maxwell1D_matrix_eDep(N0, D0, kRange, phase_zero_offset=None):
     """
-        Same function as parratt_maxwell1D_matrix, but allowing for an energy dependence of the refractive
-        indices.
-        # TODO: change edep from direct array to function?
+        Explicitly implements the energy dependent version of parratt_maxwell1D_matrix.
+        # NOTE: Potential change for the future - change edep input from direct array to function.
     """
     D = np.asarray(D0, dtype=np.complex128)
     k = np.asarray(kRange, dtype=np.complex128)
@@ -278,6 +267,34 @@ def parratt_maxwell1D_matrix_eDep(N0, D0, kRange, phase_zero_offset=None):
 
 def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
                                 formula_option='Full'):
+    """ Calculates the scattering matrix of a 1D cavity containing a single atom
+        at a given position.
+        Input format:
+        - k: a 1D array/list of k-values or frequencies to compute the spectra on.
+        - N: [N0, N1, N2, ..., NN, NN+1]; refractive indices of different layers,
+                                           where N0,NN+1 is the space to the left/right,
+                                           respectively and the rest are the layers.
+        - D: [-1, D1, D2, ..., DN, -1];   thicknesses of the different layers,
+                                           left/right space do not have thicknesses,
+                                           the rest are the layers
+        - atom_params: [atom_pos, atom_dPol, atom_om, atom_gamma];
+            - atom_pos:   float;  indicates the position of the atom relative to the left
+                                  boundary
+            - atom_dPol:  float;  dipole moment of the atom in arbitrary units
+            - atom_om:    float;  transition frequency of the atom in the same units as k
+            - atom_gamma: float;  decay rate into *other* channels, same units as k
+        - phase_zero_offset: None or array of length k;
+                             An offset phase indicating where the zero of your
+                             position coordinate system is.
+        - formula_option: There are different versions of linear dispersion theory in the
+                          lirature. This function allows for two of them.
+            - 'Full': Full linear dispersion theory
+                      (see e.g. https://doi.org/10.1103/PhysRevResearch.2.023396),
+                      only neglecting the A^2 term
+                      (see e.g. https://doi.org/10.1103/PhysRevA.93.012120).
+            - 'Rot':  Standard version TODO
+
+    """
     atom_pos, atom_dPol, atom_om, atom_gamma = atom_params
 
     # find the index of the layer the atom is in and the position of the start of that layer:
@@ -308,7 +325,7 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
         susc_atom = -2.*atom_dPol**2 * num_dens*atom_om**3/(k**2-atom_om**2) \
                      /(k**2)
         n_atom = np.sqrt(1.0+0j + susc_atom)
-    elif formula_option == 'Standard':
+    elif formula_option == 'Rot':
         '''
         Standard version of the linear dispersion formula, e.g. from
         lecture by J. Evers (Heidelberg) or from Roehlsberger 2004.
