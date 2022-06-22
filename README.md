@@ -1,5 +1,5 @@
-QuTiP: Quantum Toolbox in Python
-================================
+pyrot
+=====
 
 [D. Lentrodt](https://github.com/dlentrodt)
 
