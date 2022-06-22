@@ -29,5 +29,5 @@ Documentation
 A detailed documentation is currently not available and will be added at a
 later time. Explanatory simple examples can be found in `demo/`.
 For mathematical details and physics background please refer to
-https://arxiv.org/abs/2107.11775 and .
+https://arxiv.org/abs/2107.11775 and https://doi.org/10.1103/PhysRevX.10.011008.
 
