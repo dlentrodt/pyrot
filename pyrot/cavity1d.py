@@ -107,28 +107,28 @@ class CavityAtoms1d(Cavity1d):
 
         super().__init__(n, t)
 
-    def linear_scattering_matrix(self, k, zero_offset=0.0):
-        _, _, result = linear_dispersion_scattering_multi_atom(k, self.n, self.t, self.atoms_params, phase_zero_offset=-k*zero_offset)
+    def linear_scattering_matrix(self, k, zero_offset=0.0, formula_option='Full'):
+        _, _, result = linear_dispersion_scattering_multi_atom(k, self.n, self.t, self.atoms_params, phase_zero_offset=-k*zero_offset, formula_option=formula_option)
         return result
 
-    def linear_transmission_coefficient(self, k, input_from_right=False, zero_offset=0.0):
+    def linear_transmission_coefficient(self, k, input_from_right=False, zero_offset=0.0, formula_option='Full'):
         if input_from_right:
-            return self.linear_scattering_matrix(k, zero_offset=zero_offset)[1,1]
-        return self.linear_scattering_matrix(k, zero_offset=zero_offset)[0,0]
+            return self.linear_scattering_matrix(k, zero_offset=zero_offset, formula_option=formula_option)[1,1]
+        return self.linear_scattering_matrix(k, zero_offset=zero_offset, formula_option=formula_option)[0,0]
 
-    def linear_transmission_intensity(self, k, input_from_right=False, zero_offset=0.0):
-        return np.abs(self.linear_transmission_coefficient(k, input_from_right=input_from_right, zero_offset=zero_offset))**2
+    def linear_transmission_intensity(self, k, input_from_right=False, zero_offset=0.0, formula_option='Full'):
+        return np.abs(self.linear_transmission_coefficient(k, input_from_right=input_from_right, zero_offset=zero_offset, formula_option=formula_option))**2
 
-    def linear_reflection_coefficient(self, k, input_from_right=False, zero_offset=0.0):
+    def linear_reflection_coefficient(self, k, input_from_right=False, zero_offset=0.0, formula_option='Full'):
         if input_from_right:
-            return self.linear_scattering_matrix(k, zero_offset=zero_offset)[1,0]
-        return self.linear_scattering_matrix(k, zero_offset=zero_offset)[0,1] # TODO: check order
+            return self.linear_scattering_matrix(k, zero_offset=zero_offset, formula_option=formula_option)[1,0]
+        return self.linear_scattering_matrix(k, zero_offset=zero_offset, formula_option=formula_option)[0,1] # TODO: check order
 
-    def linear_reflection_intensity(self, k, input_from_right=False, zero_offset=0.0):
-        return np.abs(self.linear_reflection_coefficient(k, input_from_right=input_from_right, zero_offset=zero_offset))**2
+    def linear_reflection_intensity(self, k, input_from_right=False, zero_offset=0.0, formula_option='Full'):
+        return np.abs(self.linear_reflection_coefficient(k, input_from_right=input_from_right, zero_offset=zero_offset, formula_option=formula_option))**2
 
-    def linear_layer_system_with_atom(self, k, zero_offset=0.0):
-        N, T, _ = linear_dispersion_scattering_multi_atom(k, self.n, self.t, self.atoms_params, phase_zero_offset=-k*zero_offset)
+    def linear_layer_system_with_atom(self, k, zero_offset=0.0, formula_option='Full'):
+        N, T, _ = linear_dispersion_scattering_multi_atom(k, self.n, self.t, self.atoms_params, phase_zero_offset=-k*zero_offset, formula_option=formula_option)
         return N, T
 
     def draw_cav(self, depth):
@@ -307,7 +307,7 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
             n_atomLayer = N[i+1] # refractive index of the layer containing the atom
             break
 
-    gamma_eff = atom_gamma
+    atom_gamma = atom_gamma
 
     t_min = min(np.amin(T[1:-1]), 1.0/np.amax(k))
     t_small = t_min/100000000.0 # -> simulates delta function
@@ -322,8 +322,8 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
         approximation. The A^2 term is however neglected, since this
         would involve an additional constant.
         '''
-        susc_atom = -2.*atom_dPol**2 * num_dens*atom_om**3/(k**2-atom_om**2) \
-                     /(k**2)
+        susc_atom = -2.*atom_dPol**2 * num_dens*atom_om**3/((k+1j*atom_gamma/2.)**2-atom_om**2) \
+                      /(k**2)
         n_atom = np.sqrt(1.0+0j + susc_atom)
     elif formula_option == 'Rot':
         '''
@@ -339,8 +339,10 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
         single atom assumption.
         '''
         susc_atom = 2.0*atom_dPol**2 * num_dens \
-                    * (-1.0)/(1j*gamma_eff + 2.0*(k-atom_om))
+                    * (-1.0)/(1j*atom_gamma + 2.0*(k-atom_om))
         n_atom = np.sqrt(1.0+0j + susc_atom)
+    else:
+        raise ValueError('formula_option must be "Full" or "Rot"')
         
     ###################################################################
     ### Assemble layer system #########################################
@@ -365,8 +367,7 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
 
     return N_int, T_int, parratt_maxwell1D_matrix(N_int, T_int, k, phase_zero_offset=phase_zero_offset)
 
-def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_offset=None,
-                                formula_option='Full'):
+def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_offset=None, formula_option='Full'):
     Nc = copy.deepcopy(N)
     Tc = copy.deepcopy(T)
 
@@ -411,8 +412,6 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
                     n_atomLayer = Nc[i+1] # refractive index of the layer containing the atom
                     break
 
-            gamma_eff = atom_gamma
-
             num_dens = 1.0/t_small     # "number density" -> simulates one atom smeared over simulated delta function
             
             ###################################################################
@@ -423,9 +422,9 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
                 Version from TODO: does not assume the rotating-wave
                 approximation. The A^2 term is however neglected (see TODO).
                 '''
-                susc_atom = -2.*atom_dPol**2 * num_dens*atom_om**3/(k**2-atom_om**2) \
-                             /(k**2) # TODO: include gamma_eff here?!
-            elif formula_option == 'Rot. wave':
+                susc_atom = -2.*atom_dPol**2 * num_dens*atom_om**3/((k+1j*atom_gamma/2.)**2-atom_om**2) \
+                             /(k**2)
+            elif formula_option == 'Rot':
                 '''
                 Standard version of the linear dispersion formula, e.g. from
                 TODO.
@@ -439,19 +438,22 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
                 single atom assumption.
                 '''
                 susc_atom = 2.0*atom_dPol**2 * num_dens \
-                            * (-1.0)/(1j*gamma_eff + 2.0*(k-atom_om))
+                            * (-1.0)/(1j*atom_gamma + 2.0*(k-atom_om))
+            else:
+                raise ValueError('formula_option must be "Full" or "Rot"')
 
             if not (type(on_top[a_i]) == bool):
                 for j in on_top[a_i]:
                     atom_pos_j, atom_dPol_j, atom_om_j, atom_gamma_j = atoms_params[j]
-                    gamma_eff_j = atom_gamma_j
                     # add susceptibilities of atoms/transitions that are on top of each other.
                     if formula_option == 'Full':
-                        susc_atom += -2.*atom_dPol_j**2 * num_dens*atom_om_j**3/(k**2-atom_om_j**2) \
-                                     /(k**2) # TODO: include gamma_eff here?!
-                    elif formula_option == 'Rot. wave':
+                        susc_atom += -2.*atom_dPol_j**2 * num_dens*atom_om_j**3/((k+1j*atom_gamma_j/2.)**2-atom_om_j**2) \
+                                    /(k**2)
+                    elif formula_option == 'Rot':
                         susc_atom += 2.0*atom_dPol_j**2 * num_dens \
-                                    * (-1.0)/(1j*gamma_eff_j + 2.0*(k-atom_om_j))
+                                    * (-1.0)/(1j*atom_gamma_j + 2.0*(k-atom_om_j))
+                    else:
+                        raise ValueError('formula_option must be "Full" or "Rot"')
 
             n_atom = np.sqrt(1.0+0j + susc_atom)
                 
