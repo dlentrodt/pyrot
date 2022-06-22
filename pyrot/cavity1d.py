@@ -229,10 +229,6 @@ def parratt_maxwell1D_matrix_eDep(N0, D0, kRange, phase_zero_offset=None):
     N = np.zeros((len(N0), len(k)), dtype=np.complex128) 
     for i, n_l in enumerate(N0):
         N[i, :] = n_l
-    # #plt.imshow(np.abs(N)**2, aspect='auto', norm=LogNorm(vmin=0.1, vmax=100))
-    # plt.imshow(np.abs(N)**2, aspect='auto')
-    # plt.colorbar()
-    # plt.show()
     transfer_matrix_tot = np.asarray([[np.ones_like(k), np.zeros_like(k)],
                                       [np.zeros_like(k), np.ones_like(k)]])
     for p in np.arange(len(N)-1):
@@ -292,8 +288,9 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
                       (see e.g. https://doi.org/10.1103/PhysRevResearch.2.023396),
                       only neglecting the A^2 term
                       (see e.g. https://doi.org/10.1103/PhysRevA.93.012120).
-            - 'Rot':  Standard version TODO
-
+            - 'Rot':  Standard version of linear dispersion theory within the
+                      rotating-wave approximation. Expressions of this form are e.g.
+                      used in nuclear resonance scattering theory (https://doi.org/10.1023/A:1017075907804).
     """
     atom_pos, atom_dPol, atom_om, atom_gamma = atom_params
 
@@ -327,15 +324,15 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
         n_atom = np.sqrt(1.0+0j + susc_atom)
     elif formula_option == 'Rot':
         '''
-        Standard version of the linear dispersion formula, e.g. from
-        lecture by J. Evers (Heidelberg) or from Roehlsberger 2004.
-        There are TWO approximations implicit here:
-            1. Rotating-wave approximation.
-            2. atom_om**2/k**2 ~ 1
-        Note that 2. already breaks in the multi-mode strong coupling
-        regime, where 1. often still holds.
+        Standard version of the linear dispersion formula
+        (as e.g. used in nuclear resonance scattering, see https://doi.org/10.1023/A:1017075907804).
+        There are two related approximations implicit here:
+            (1) Rotating-wave approximation.
+            (2) atom_om**2/k**2 ~ 1.
+        Note that (2) already may already break in the
+        multi-mode strong coupling egime, where (1) often still holds.
         Note also that n_atom = 1.0+0j + susc_atom/2.0
-        does not hold here because susc is large due to the thin layer/
+        does not hold here, because susc is large due to the thin layer/
         single atom assumption.
         '''
         susc_atom = 2.0*atom_dPol**2 * num_dens \
@@ -368,6 +365,10 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
     return N_int, T_int, parratt_maxwell1D_matrix(N_int, T_int, k, phase_zero_offset=phase_zero_offset)
 
 def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_offset=None, formula_option='Full'):
+    """ Same functiona as linear_dispersion_scattering(), but allowing for multiple atoms. Atoms at approximately
+        identical positions are combined into one refractive index. "Approximately identical position" is
+        determined by the smallest length scale of the problem.
+    """
     Nc = copy.deepcopy(N)
     Tc = copy.deepcopy(T)
 
@@ -419,22 +420,23 @@ def linear_dispersion_scattering_multi_atom(k, N, T, atoms_params, phase_zero_of
             ###################################################################
             if formula_option == 'Full':
                 '''
-                Version from TODO: does not assume the rotating-wave
-                approximation. The A^2 term is however neglected (see TODO).
+                Version from https://doi.org/10.1103/PhysRevX.10.011008:
+                does not assume the rotating-wave approximation.
+                The A^2 term, however, is neglected (see also https://doi.org/10.1103/PhysRevA.93.012120).
                 '''
                 susc_atom = -2.*atom_dPol**2 * num_dens*atom_om**3/((k+1j*atom_gamma/2.)**2-atom_om**2) \
                              /(k**2)
             elif formula_option == 'Rot':
                 '''
-                Standard version of the linear dispersion formula, e.g. from
-                TODO.
-                There are TWO approximations implicit here:
-                    1. Rotating-wave approximation.
-                    2. atom_om**2/k**2 ~ 1
-                Note that 2. already breaks in the multi-mode strong coupling
-                regime, where 1. often still holds.
+                Standard version of the linear dispersion formula
+                (as e.g. used in nuclear resonance scattering, see https://doi.org/10.1023/A:1017075907804).
+                There are two related approximations implicit here:
+                    (1) Rotating-wave approximation.
+                    (2) atom_om**2/k**2 ~ 1.
+                Note that (2) already may already break in the
+                multi-mode strong coupling egime, where (1) often still holds.
                 Note also that n_atom = 1.0+0j + susc_atom/2.0
-                does not hold here because susc is large due to the thin layer/
+                does not hold here, because susc is large due to the thin layer/
                 single atom assumption.
                 '''
                 susc_atom = 2.0*atom_dPol**2 * num_dens \
