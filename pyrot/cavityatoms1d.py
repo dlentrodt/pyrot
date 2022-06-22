@@ -114,7 +114,8 @@ def linear_dispersion_scattering(k, N, T, atom_params, phase_zero_offset=None,
         - formula_option: There are different versions of linear dispersion theory in the
                           lirature. This function allows for two of them.
             - 'Full': Full linear dispersion theory
-                      (see e.g. https://doi.org/10.1103/PhysRevResearch.2.023396),
+                      (see e.g. https://doi.org/10.1103/PhysRevX.10.011008,
+                                https://doi.org/10.1103/PhysRevResearch.2.023396),
                       only neglecting the A^2 term
                       (see e.g. https://doi.org/10.1103/PhysRevA.93.012120).
             - 'Rot':  Standard version of linear dispersion theory within the
