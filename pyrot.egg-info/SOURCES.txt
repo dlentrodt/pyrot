@@ -1,4 +1,0 @@
-README.md
-setup.py
-pyrot/__init__.py
-pyrot/cavity1d.py
