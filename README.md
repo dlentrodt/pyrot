@@ -5,8 +5,10 @@ pyrot
 
 *pyrot* is an open-source python software package for the physics of one-dimensional (1D)
 Fabry-Pérot cavities containing two-level atoms interacting with the light-field.
-In particular, it implements linear dispersion theory and allows to calculate 
-scattering observables.
+
+Currently, it implements the following features:
+- Transfer matrix formalism (also known as Parratt's formalism) to calculate cavity scattering.
+- Linear dispersion theory to compute *linear scattering* (i.e. in the weak driving limit) in the presence of two-level atoms.
 
 Note that this software and its algorithms are mainly designed with the goal
 of transparent physics and to illustrate theoretical concepts. It is *not*

@@ -28,6 +28,7 @@ setup(name='pyrot',
       version='0.0.0',
       author='Dominik Lentrodt',
       author_email='dominik@lentrodt.com',
-      packages=['pyrot'],
+      packages=find_packages(where="src"),
+      package_dir={"": "src"},
       package_data=package_data
     )
