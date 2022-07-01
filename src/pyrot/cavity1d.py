@@ -218,9 +218,6 @@ def parratt_maxwell1D_matrix_eDep(N0, D0, kRange, phase_zero_offset=None):
 ### algorithmic functions: Green's function
 ### (from Tomas1995: https://doi.org/10.1103/PhysRevA.51.2545)
 
-nm = 1.
-keV_to_inv_nm = 1.
-
 class Layer_class():
     def __init__(self, n, t):
         self.RefractiveIndex = n
@@ -234,7 +231,7 @@ class gr_class():
                 Layer.append(Layer_class(cav.n[i], cav.t[i]))
         self.Layer = Layer
 
-def j_from_z(z, gr): # z in [nm]
+def j_from_z(z, gr): # z in [L]
     """
     Convert depth from cavity surface into layer index + depth from layer surface.
 
@@ -256,9 +253,9 @@ def j_from_z(z, gr): # z in [nm]
     for j, t in enumerate(Thicknesses[0:-1]):
         if ( sum(Thicknesses[0:j]) < z ) and ( sum(Thicknesses[0:j+1]) >= z):
             return j+1, z-np.sum(Thicknesses[0:j])
-    return j+2, z-np.sum(Thicknesses[0:j+1]) # returns index and sum of layer thicknesses above in [nm]
+    return j+2, z-np.sum(Thicknesses[0:j+1]) # returns index and sum of layer thicknesses above in [L]
 
-def gr_to_NT(gr, ResIso):
+def gr_to_NT(gr, omega):
     """
     Gives a pynuss-independent list representation of the off-resonant layer
     properties.
@@ -272,7 +269,7 @@ def gr_to_NT(gr, ResIso):
     T = [-1] # initialize with vacuum on the outside
     for layer in gr.Layer:
         N.append(layer.RefractiveIndex)
-        T.append(layer.Thickness/nm) # [nm]
+        T.append(layer.Thickness) # [L]
     if not (gr.Layer[-1].Thickness == -1):
         # if last layer is not a substrate, pynuss includes a vacuum substrate
         # by default
@@ -281,9 +278,9 @@ def gr_to_NT(gr, ResIso):
     return N, T
 
 def gr_to_Thicknesses(gr):
-    Thicknesses = np.empty(len(gr.Layer)) #[nm]
+    Thicknesses = np.empty(len(gr.Layer)) #[L]
     for i,l in enumerate(gr.Layer):
-        Thicknesses[i] = l.Thickness/nm
+        Thicknesses[i] = l.Thickness
     if not (gr.Layer[-1].Thickness == -1):
         Thicknesses_ = np.empty(len(gr.Layer)+1)
         Thicknesses_[0:-1] = Thicknesses
@@ -291,114 +288,100 @@ def gr_to_Thicknesses(gr):
         Thicknesses = Thicknesses_
     return Thicknesses
 
-def find_res_layer_idx(gr):
-    """
-    Finds the resonant layers.
-
-    Returns list of resonant layer indices and the resonant isotope material.
-    Note: pynuss only supports a single resonant element in the system.
-    """
-    l_idx_list = []
-    for i_, layer in enumerate(gr.Layer):
-        if isinstance(layer.Material.Lattice[0].Element, pynuss.ResonantElement):
-            l_idx_list.append(i_)
-            ResIso = layer.Material
-    return l_idx_list, ResIso
-
 ### Tomas1995 functions###
-def Εs_0(z, gr, Theta, ResIsotope):
+def Εs_0(z, gr, Theta, omega):
     Field = np.zeros_like(z, dtype=np.complex128)
-    N, T = gr_to_NT(gr, ResIsotope)
+    N, T = gr_to_NT(gr, omega)
     for i,zi in enumerate(z):
         n = len(N)-1
         j, z_offset = j_from_z(zi, gr)
-        betaj = beta_j(j, N, T, Theta, ResIsotope)
-        dj = gr.Layer[j-1].Thickness/nm # [nm]
+        betaj = beta_j(j, N, T, Theta, omega)
+        dj = gr.Layer[j-1].Thickness # [L]
         if j==0 or j==(len(N)-1):
             dj = 0.
-        rs_j0 = r_i_j(j, 0, N, T, Theta, ResIsotope, pol='s') # = rs_j-
-        rs_jn = r_i_j(j, n, N, T, Theta, ResIsotope, pol='s') # = rs_j+
-        ts_0j = t_i_j(0, j, N, T, Theta, ResIsotope, pol='s')
+        rs_j0 = r_i_j(j, 0, N, T, Theta, omega, pol='s') # = rs_j-
+        rs_jn = r_i_j(j, n, N, T, Theta, omega, pol='s') # = rs_j+
+        ts_0j = t_i_j(0, j, N, T, Theta, omega, pol='s')
         Dsj = 1. - rs_j0 * rs_jn * np.exp(2j*betaj*dj)
         zm = z_offset
         zp = dj - z_offset
         Field[i] = ts_0j*np.exp(1j*betaj*dj)/Dsj * ( np.exp(-1j*betaj*zp) +  rs_jn*np.exp(+1j*betaj*zp) )
     return z, Field
 
-def Εs_n(z, gr, Theta, ResIsotope):
+def Εs_n(z, gr, Theta, omega):
     Field = np.zeros_like(z, dtype=np.complex128)
-    N, T = gr_to_NT(gr, ResIsotope)
+    N, T = gr_to_NT(gr, omega)
     for i,zi in enumerate(z):
         n = len(N)-1
         j, z_offset = j_from_z(zi, gr)
-        betaj = beta_j(j, N, T, Theta, ResIsotope)
-        dj = gr.Layer[j-1].Thickness/nm # [nm]
+        betaj = beta_j(j, N, T, Theta, omega)
+        dj = gr.Layer[j-1].Thickness # [L]
         if j==0 or j==(len(N)-1):
             dj = 0.
-        rs_j0 = r_i_j(j, 0, N, T, Theta, ResIsotope, pol='s') # = rs_j-
-        rs_jn = r_i_j(j, n, N, T, Theta, ResIsotope, pol='s') # = rs_j+
-        ts_nj = t_i_j(n, j, N, T, Theta, ResIsotope, pol='s')
+        rs_j0 = r_i_j(j, 0, N, T, Theta, omega, pol='s') # = rs_j-
+        rs_jn = r_i_j(j, n, N, T, Theta, omega, pol='s') # = rs_j+
+        ts_nj = t_i_j(n, j, N, T, Theta, omega, pol='s')
         Dsj = 1. - rs_j0 * rs_jn * np.exp(2j*betaj*dj)
         zm = z_offset
         zp = dj - z_offset
         Field[i] = ts_nj*np.exp(1j*betaj*dj)/Dsj * ( np.exp(-1j*betaj*zm) +  rs_j0*np.exp(+1j*betaj*zm) )
     return z, Field
 
-def Εp_0(z, gr, Theta, ResIsotope):
+def Εp_0(z, gr, Theta, omega):
     ### TODO: adapt to p-pol ###
     Field = np.zeros_like(z, dtype=np.complex128)
-    N, T = gr_to_NT(gr, ResIsotope)
+    N, T = gr_to_NT(gr, omega)
     for i,zi in enumerate(z):
         n = len(N)-1
         j, z_offset = j_from_z(zi, gr)
-        betaj = beta_j(j, N, T, Theta, ResIsotope)
-        dj = gr.Layer[j-1].Thickness/nm # [nm]
+        betaj = beta_j(j, N, T, Theta, omega)
+        dj = gr.Layer[j-1].Thickness # [L]
         if j==0 or j==(len(N)-1):
             dj = 0.
-        rs_j0 = r_i_j(j, 0, N, T, Theta, ResIsotope, pol='s') # = rs_j-
-        rs_jn = r_i_j(j, n, N, T, Theta, ResIsotope, pol='s') # = rs_j+
-        ts_0j = t_i_j(0, j, N, T, Theta, ResIsotope, pol='s')
+        rs_j0 = r_i_j(j, 0, N, T, Theta, omega, pol='s') # = rs_j-
+        rs_jn = r_i_j(j, n, N, T, Theta, omega, pol='s') # = rs_j+
+        ts_0j = t_i_j(0, j, N, T, Theta, omega, pol='s')
         Dsj = 1. - rs_j0 * rs_jn * np.exp(2j*betaj*dj)
         zm = z_offset
         zp = dj - z_offset
         Field[i] = ts_0j*np.exp(1j*betaj*dj)/Dsj * ( np.exp(-1j*betaj*zp) +  rs_jn*np.exp(+1j*betaj*zp) )
     return z, Field
 
-def Εp_n(z, gr, Theta, ResIsotope):
+def Εp_n(z, gr, Theta, omega):
     ### TODO: adapt to p-pol ###
     Field = np.zeros_like(z, dtype=np.complex128)
-    N, T = gr_to_NT(gr, ResIsotope)
+    N, T = gr_to_NT(gr, omega)
     for i,zi in enumerate(z):
         n = len(N)-1
         j, z_offset = j_from_z(zi, gr)
-        betaj = beta_j(j, N, T, Theta, ResIsotope)
-        dj = gr.Layer[j-1].Thickness/nm # [nm]
+        betaj = beta_j(j, N, T, Theta, omega)
+        dj = gr.Layer[j-1].Thickness # [L]
         if j==0 or j==(len(N)-1):
             dj = 0.
-        rs_j0 = r_i_j(j, 0, N, T, Theta, ResIsotope, pol='s') # = rs_j-
-        rs_jn = r_i_j(j, n, N, T, Theta, ResIsotope, pol='s') # = rs_j+
-        ts_nj = t_i_j(n, j, N, T, Theta, ResIsotope, pol='s')
+        rs_j0 = r_i_j(j, 0, N, T, Theta, omega, pol='s') # = rs_j-
+        rs_jn = r_i_j(j, n, N, T, Theta, omega, pol='s') # = rs_j+
+        ts_nj = t_i_j(n, j, N, T, Theta, omega, pol='s')
         Dsj = 1. - rs_j0 * rs_jn * np.exp(2j*betaj*dj)
         zm = z_offset
         zp = dj - z_offset
         Field[i] = ts_nj*np.exp(1j*betaj*dj)/Dsj * ( np.exp(-1j*betaj*zm) +  rs_j0*np.exp(+1j*betaj*zm) )
     return z, Field
 
-def beta_j(j, N, T, Theta, ResIsotope):
-    omega = ResIsotope # [keV]
-    k = omega*keV_to_inv_nm # [1/nm]
-    k_parallel = k*np.cos(Theta) # [1/nm]
+def beta_j(j, N, T, Theta, omega):
+    omega = omega # [keV]
+    k = omega # [1/L]
+    k_parallel = k*np.cos(Theta) # [1/L]
     betaj = np.sqrt(N[j]**2*k**2-k_parallel**2)
-    return betaj # [1/nm]
+    return betaj # [1/L]
 
-def D_j_i_k(j, i, k, N, T, Theta, ResIsotope, pol='s'):
-    betaj = beta_j(j, N, T, Theta, ResIsotope)
+def D_j_i_k(j, i, k, N, T, Theta, omega, pol='s'):
+    betaj = beta_j(j, N, T, Theta, omega)
     dj = T[j] # [m] TODO: units
-    rj_i = r_i_j(j, i, N, T, Theta, ResIsotope, pol=pol)
-    rj_k = r_i_j(j, k, N, T, Theta, ResIsotope, pol=pol)
+    rj_i = r_i_j(j, i, N, T, Theta, omega, pol=pol)
+    rj_k = r_i_j(j, k, N, T, Theta, omega, pol=pol)
     return 1. - rj_i*rj_k*np.exp(2.j*betaj*dj)
 
-def gamma_ij(i, j, N, T, Theta, ResIsotope, pol='s'):
+def gamma_ij(i, j, N, T, Theta, omega, pol='s'):
     ### single interface, abs(i-j)=1 ###
     if not (np.abs(i-j) == 1):
         raise ValueError('Not adjacent layers, gamma_ij not defined.')
@@ -408,46 +391,46 @@ def gamma_ij(i, j, N, T, Theta, ResIsotope, pol='s'):
     ϵj = N[j]**2
     return ϵi/ϵj
 
-def r_ij(i, j, N, T, Theta, ResIsotope, pol='s'):
+def r_ij(i, j, N, T, Theta, omega, pol='s'):
     if not (np.abs(i-j) == 1):
         raise ValueError('Not adjacent layers, r_ij not defined.')
-    betai = beta_j(i, N, T, Theta, ResIsotope)
-    betaj = beta_j(j, N, T, Theta, ResIsotope)
-    gammaij = gamma_ij(i, j, N, T, Theta, ResIsotope, pol=pol)
+    betai = beta_j(i, N, T, Theta, omega)
+    betaj = beta_j(j, N, T, Theta, omega)
+    gammaij = gamma_ij(i, j, N, T, Theta, omega, pol=pol)
     return (betai - gammaij*betaj)/(betai + gammaij*betaj)
 
-def t_ij(i, j, N, T, Theta, ResIsotope, pol='s'):
+def t_ij(i, j, N, T, Theta, omega, pol='s'):
     if not (np.abs(i-j) == 1):
         raise ValueError('Not adjacent layers, t_ij not defined.')
-    gammaij = gamma_ij(i, j, N, T, Theta, ResIsotope, pol=pol)
-    rij = r_ij(i, j, N, T, Theta, ResIsotope, pol=pol)
+    gammaij = gamma_ij(i, j, N, T, Theta, omega, pol=pol)
+    rij = r_ij(i, j, N, T, Theta, omega, pol=pol)
     return np.sqrt(gammaij)*(1. + rij)
 
-def r_i_j_k(i, j, k, N, T, Theta, ResIsotope, pol='s'):
+def r_i_j_k(i, j, k, N, T, Theta, omega, pol='s'):
     ### recurrence relation ###
-    betaj = beta_j(j, N, T, Theta, ResIsotope)
+    betaj = beta_j(j, N, T, Theta, omega)
     dj = T[j] # [m] TODO: units
-    Dj = D_j_i_k(j, i, k, N, T, Theta, ResIsotope, pol=pol)
-    ri_j = r_i_j(i, j, N, T, Theta, ResIsotope, pol=pol)
-    rj_i = r_i_j(j, i, N, T, Theta, ResIsotope, pol=pol)
-    rj_k = r_i_j(j, k, N, T, Theta, ResIsotope, pol=pol)
-    ti_j = t_i_j(i, j, N, T, Theta, ResIsotope, pol=pol)
-    tj_i = t_i_j(j, i, N, T, Theta, ResIsotope, pol=pol)
+    Dj = D_j_i_k(j, i, k, N, T, Theta, omega, pol=pol)
+    ri_j = r_i_j(i, j, N, T, Theta, omega, pol=pol)
+    rj_i = r_i_j(j, i, N, T, Theta, omega, pol=pol)
+    rj_k = r_i_j(j, k, N, T, Theta, omega, pol=pol)
+    ti_j = t_i_j(i, j, N, T, Theta, omega, pol=pol)
+    tj_i = t_i_j(j, i, N, T, Theta, omega, pol=pol)
     return 1./Dj * ( ri_j + (ti_j*tj_i - ri_j*rj_i) * rj_k * np.exp(2j*betaj*dj) )
 
-def t_i_j_k(i, j, k, N, T, Theta, ResIsotope, pol='s'):
+def t_i_j_k(i, j, k, N, T, Theta, omega, pol='s'):
     ### recurrence relation ###
-    betaj = beta_j(j, N, T, Theta, ResIsotope)
+    betaj = beta_j(j, N, T, Theta, omega)
     dj = T[j] # [m] TODO: units
-    Dj = D_j_i_k(j, i, k, N, T, Theta, ResIsotope, pol=pol)
-    ti_j = t_i_j(i, j, N, T, Theta, ResIsotope, pol=pol)
-    tj_k = t_i_j(j, k, N, T, Theta, ResIsotope, pol=pol)
+    Dj = D_j_i_k(j, i, k, N, T, Theta, omega, pol=pol)
+    ti_j = t_i_j(i, j, N, T, Theta, omega, pol=pol)
+    tj_k = t_i_j(j, k, N, T, Theta, omega, pol=pol)
     return 1./Dj * ti_j*tj_k * np.exp(1j*betaj*dj)
 
-def r_i_j(i, j, N, T, Theta, ResIsotope, pol='s'):
+def r_i_j(i, j, N, T, Theta, omega, pol='s'):
     ### starts and ends the recurrence chain ###
     if np.abs(i-j) == 1:
-        return r_ij(i, j, N, T, Theta, ResIsotope, pol=pol)
+        return r_ij(i, j, N, T, Theta, omega, pol=pol)
     if i==j:
         return 0.+0.j
     # choose middle index to start recurrence chain #
@@ -455,12 +438,12 @@ def r_i_j(i, j, N, T, Theta, ResIsotope, pol='s'):
         k=i-1
     else:
         k=i+1
-    return r_i_j_k(i, k, j, N, T, Theta, ResIsotope, pol=pol)
+    return r_i_j_k(i, k, j, N, T, Theta, omega, pol=pol)
 
-def t_i_j(i, j, N, T, Theta, ResIsotope, pol='s'):
+def t_i_j(i, j, N, T, Theta, omega, pol='s'):
     ### starts and ends the recurrence chain ###
     if np.abs(i-j) == 1:
-        return t_ij(i, j, N, T, Theta, ResIsotope, pol=pol)
+        return t_ij(i, j, N, T, Theta, omega, pol=pol)
     if i==j:
         return 1.+0.j
     # choose middle index to start recurrence chain #
@@ -468,10 +451,10 @@ def t_i_j(i, j, N, T, Theta, ResIsotope, pol='s'):
         k=i-1
     else:
         k=i+1
-    return t_i_j_k(i, k, j, N, T, Theta, ResIsotope, pol=pol)
+    return t_i_j_k(i, k, j, N, T, Theta, omega, pol=pol)
 
-def GF(z, z0, gr, Theta, ResIso, pol='s'):
-    N, T = gr_to_NT(gr, ResIso)
+def GF(z, z0, gr, Theta, omega, pol='s'):
+    N, T = gr_to_NT(gr, omega)
     xip = 1
     xis = -1
     if pol == 'p':
@@ -479,13 +462,13 @@ def GF(z, z0, gr, Theta, ResIso, pol='s'):
     else:
         xiq = xis
     n = len(N)-1
-    betan = beta_j(n, N, T, Theta, ResIso)
-    ts_0n = t_i_j(0, n, N, T, Theta, ResIso)
+    betan = beta_j(n, N, T, Theta, omega)
+    ts_0n = t_i_j(0, n, N, T, Theta, omega)
     # only single pol (s):
-    zs,Es0_1 = Εs_0(z, gr, Theta, ResIso)
-    zs,Esn_1 = Εs_n(z0, gr, Theta, ResIso)
-    zs,Es0_2 = Εs_0(z0, gr, Theta, ResIso)
-    zs,Esn_2 = Εs_n(z, gr, Theta, ResIso)
+    zs,Es0_1 = Εs_0(z, gr, Theta, omega)
+    zs,Esn_1 = Εs_n(z0, gr, Theta, omega)
+    zs,Es0_2 = Εs_0(z0, gr, Theta, omega)
+    zs,Esn_2 = Εs_n(z, gr, Theta, omega)
     Z0, Z = np.meshgrid(z0, z) # note reversed order for consistency with np.outer
     heavi_1 = np.heaviside(np.real(Z-Z0), 0.5)
     heavi_2 = np.heaviside(np.real(Z0-Z), 0.5)
