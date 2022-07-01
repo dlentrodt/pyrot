@@ -48,28 +48,28 @@ class CavityAtoms1d(Cavity1d):
 
         super().__init__(n, t)
 
-    def linear_scattering_matrix(self, k, zero_offset=0.0, formula_option='Full'):
-        _, _, result = linear_dispersion_scattering_multi_atom(k, self.n, self.t, self.atoms_params, phase_zero_offset=-k*zero_offset, formula_option=formula_option)
+    def linear_scattering_matrix(self, omega, zero_offset=0.0, formula_option='Full'):
+        _, _, result = linear_dispersion_scattering_multi_atom(omega, self.n, self.t, self.atoms_params, phase_zero_offset=-omega*zero_offset, formula_option=formula_option)
         return result
 
-    def linear_transmission_coefficient(self, k, input_from_right=False, zero_offset=0.0, formula_option='Full'):
+    def linear_transmission_coefficient(self, omega, input_from_right=False, zero_offset=0.0, formula_option='Full'):
         if input_from_right:
-            return self.linear_scattering_matrix(k, zero_offset=zero_offset, formula_option=formula_option)[1,1]
-        return self.linear_scattering_matrix(k, zero_offset=zero_offset, formula_option=formula_option)[0,0]
+            return self.linear_scattering_matrix(omega, zero_offset=zero_offset, formula_option=formula_option)[1,1]
+        return self.linear_scattering_matrix(omega, zero_offset=zero_offset, formula_option=formula_option)[0,0]
 
-    def linear_transmission_intensity(self, k, input_from_right=False, zero_offset=0.0, formula_option='Full'):
-        return np.abs(self.linear_transmission_coefficient(k, input_from_right=input_from_right, zero_offset=zero_offset, formula_option=formula_option))**2
+    def linear_transmission_intensity(self, omega, input_from_right=False, zero_offset=0.0, formula_option='Full'):
+        return np.abs(self.linear_transmission_coefficient(omega, input_from_right=input_from_right, zero_offset=zero_offset, formula_option=formula_option))**2
 
-    def linear_reflection_coefficient(self, k, input_from_right=False, zero_offset=0.0, formula_option='Full'):
+    def linear_reflection_coefficient(self, omega, input_from_right=False, zero_offset=0.0, formula_option='Full'):
         if input_from_right:
-            return self.linear_scattering_matrix(k, zero_offset=zero_offset, formula_option=formula_option)[1,0]
-        return self.linear_scattering_matrix(k, zero_offset=zero_offset, formula_option=formula_option)[0,1] # TODO: check order
+            return self.linear_scattering_matrix(omega, zero_offset=zero_offset, formula_option=formula_option)[1,0]
+        return self.linear_scattering_matrix(omega, zero_offset=zero_offset, formula_option=formula_option)[0,1] # TODO: check order
 
-    def linear_reflection_intensity(self, k, input_from_right=False, zero_offset=0.0, formula_option='Full'):
-        return np.abs(self.linear_reflection_coefficient(k, input_from_right=input_from_right, zero_offset=zero_offset, formula_option=formula_option))**2
+    def linear_reflection_intensity(self, omega, input_from_right=False, zero_offset=0.0, formula_option='Full'):
+        return np.abs(self.linear_reflection_coefficient(omega, input_from_right=input_from_right, zero_offset=zero_offset, formula_option=formula_option))**2
 
-    def linear_layer_system_with_atom(self, k, zero_offset=0.0, formula_option='Full'):
-        N, T, _ = linear_dispersion_scattering_multi_atom(k, self.n, self.t, self.atoms_params, phase_zero_offset=-k*zero_offset, formula_option=formula_option)
+    def linear_layer_system_with_atom(self, omega, zero_offset=0.0, formula_option='Full'):
+        N, T, _ = linear_dispersion_scattering_multi_atom(omega, self.n, self.t, self.atoms_params, phase_zero_offset=-omega*zero_offset, formula_option=formula_option)
         return N, T
 
     def draw_cav(self, depth):

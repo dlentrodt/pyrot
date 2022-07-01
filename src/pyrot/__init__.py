@@ -21,6 +21,6 @@ __version__ = '0.0.0'
 __author__ = 'Dominik Lentrodt'
 __license__ = 'GPLv3 or later'
 
-from .cavity1d import Cavity1d
+from .cavity1d import Cavity1d, j_from_z
 from .cavityatoms1d import CavityAtoms1d
 from ._tools import *
