@@ -35,6 +35,8 @@ A detailed documentation is currently not available and will be added at a
 later time. The current main documentation is given in form of explanatory jupyter notebooks,
 which can be found in `demo/`.
 
+![Package illustration.](./images/illu_readme.pdf)
+
 As a short documentation on the underlying algorithms, mathematical details and physics background
 is given in the following resources:
 - **Parratt's formalism** is particularly known from x-ray scattering on thin films.
