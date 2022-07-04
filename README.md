@@ -32,8 +32,8 @@ Documentation
 -------------
 
 A detailed documentation is currently not available and will be added at a
-later time. Explanatory simple examples can be found in `demo/`. The package
-was released together with https://arxiv.org/abs/2107.11775 and used therein.
+later time. The current main documentation is given in form of explanatory jupyter notebooks,
+which can be found in `demo/`.
 
 As short documentation on the underlying algorithms, mathematical details and physics background
 is given in the following:
@@ -58,3 +58,17 @@ and is available analytically via a recursive algorithm [https://doi.org/10.1103
 - The Green's function can e.g. be used to set up Markovian Master equations for the atom ensemble in the weak coupling limit. [see https://arxiv.org/abs/0902.3586]
 
 For a summary of these methods and their connection see also https://doi.org/10.11588/heidok.00030671.
+
+Citing *pyrot*
+--------------
+
+The package was released together with https://arxiv.org/abs/2107.11775 and is used therein.
+If you use *pyrot* in your research, please cite this preprint or the corresponding journal article once available.
+
+*pyrot* further builds on techniques developed in https://doi.org/10.1103/PhysRevX.10.011008,
+https://doi.org/10.1103/PhysRevResearch.2.023396 and summarized in https://doi.org/10.11588/heidok.00030671. Please consider
+citing these papers if you find them useful.
+
+
+
+
