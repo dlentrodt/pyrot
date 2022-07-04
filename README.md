@@ -7,9 +7,9 @@ pyrot
 Fabry-Pérot cavities containing two-level atoms interacting with the light-field.
 
 Currently, it implements the following features:
-- **Transfer matrix formalism** (also known as Parratt's formalism) to calculate cavity scattering.
+- **Transfer matrix formalism** (also known as Parratt's formalism) to calculate cavity scattering [see e.g. ].
 - **Linear dispersion theory** to compute linear scattering (i.e. in the weak driving limit) when two-level atoms are present inside the cavity.
-- Calculation of the cavity **Green's function** via a recursive algorithm (https://doi.org/10.1103/PhysRevA.51.2545). The Green's function can e.g. be used to set up Markovian Master equations for the atom ensemble in the weak coupling limit.
+- Calculation of the cavity **Green's function** via a recursive algorithm [https://doi.org/10.1103/PhysRevA.51.2545]. The Green's function can e.g. be used to set up Markovian Master equations for the atom ensemble in the weak coupling limit.
 
 
 Note that this software and its algorithms are mainly designed with the goal
@@ -21,11 +21,11 @@ Installation
 
 It is recommended to first create a virtual environment.
 
-*pyrot* can then be installed using
+*pyrot* is available on `pip` and can be installed using
 
-    pip install pyrot-0.0.0.tar.gz
-
-where the tar-ball can be found in the distributions directory `dist/`.
+```bash
+pip install pyrot
+```
 
 Documentation
 -------------

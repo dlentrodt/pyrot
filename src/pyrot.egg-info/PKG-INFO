@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: pyrot
+Version: 0.0.0
+Summary: A python package for the physics of 1D Fabry-Perot cavities interacting with atoms.
+Home-page: https://github.com/dlentrodt/pyrot
+Author: Dominik Lentrodt
+Author-email: dominik@lentrodt.com
+License: GPLv3
+License-File: LICENSE.txt
