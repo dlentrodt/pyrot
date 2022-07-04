@@ -7,9 +7,9 @@ pyrot
 Fabry-Pérot cavities containing two-level atoms interacting with the light-field.
 
 Currently, it implements the following features:
-- **Transfer matrix formalism** (also known as Parratt's formalism) to calculate cavity scattering [see e.g. ].
+- **Transfer matrix formalism** (also known as Parratt's formalism) to calculate cavity scattering.
 - **Linear dispersion theory** to compute linear scattering (i.e. in the weak driving limit) when two-level atoms are present inside the cavity.
-- Calculation of the cavity **Green's function** via a recursive algorithm [https://doi.org/10.1103/PhysRevA.51.2545]. The Green's function can e.g. be used to set up Markovian Master equations for the atom ensemble in the weak coupling limit.
+- Calculation of the cavity **Green's function** via a recursive algorithm.
 
 
 Note that this software and its algorithms are mainly designed with the goal
@@ -33,6 +33,23 @@ Documentation
 A detailed documentation is currently not available and will be added at a
 later time. Explanatory simple examples can be found in `demo/`. The package
 was released together with https://arxiv.org/abs/2107.11775 and used therein.
-For mathematical details and physics background please refer to
-https://doi.org/10.11588/heidok.00030671 and https://doi.org/10.1103/PhysRevX.10.011008.
+
+As short documentation on the underlying algorithms, mathematical details and physics background
+is given in the following:
+- **Parratt's formalism** is particularly known from x-ray scattering on thin films.
+It essentially solves Maxwell's equations for a stack of layers with a given refractive index.
+The formalism works recursively by adding up all the paths between the layer interfaces, whose response
+is encoded in their Fresnel coefficients.
+- The **transfer matrix formalism** can be considered a rewriting of Parratt's formalism, which packs the
+recursively algorithm into a Matrix multiplication. In addition, it allows for polarization. However, this
+package deals with normal incidence only (for now) and polarization is ignored (for now).
+- **Linear dispersion theory** is a method to encode the response of level schemes (such as atoms) into a
+frequency dependent refractive index. This simplification is possible at *weak excitation*, where the
+level schemes behave like classical oscillators, such that the *response is linear in the
+excitation field*. It relies on the approximation $\langle\sigma^-(t)\rangle\approx-1$ or similar formulations.
+- The classical electromagnetic **Green's function** is defined by the equation $$[\nabla\times\nabla\times - \frac{\omega^2}{c^2}n^2(r)]G(r,r',\omega) = \delta(r-r').$$
+It can e.g. be used to set up Markovian Master equations for the atom ensemble in the weak coupling limit.
+
+For a summary of these methods and their connection see also https://doi.org/10.11588/heidok.00030671
+and https://doi.org/10.1103/PhysRevX.10.011008.
 
