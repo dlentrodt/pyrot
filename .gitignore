@@ -40,3 +40,6 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+
+# Bash script for copying illustration figures
+.copy-illu.sh
