@@ -3,7 +3,7 @@ pyrot
 
 [D. Lentrodt](https://github.com/dlentrodt)
 
-*pyrot* is an open-source python software package for the physics of one-dimensional (1D)
+*pyrot* is an open-source python package for the physics of one-dimensional (1D)
 Fabry-Pérot cavities containing two-level atoms interacting with the light-field.
 
 Currently, it implements the following features:
@@ -31,7 +31,8 @@ Documentation
 -------------
 
 A detailed documentation is currently not available and will be added at a
-later time. Explanatory simple examples can be found in `demo/`.
+later time. Explanatory simple examples can be found in `demo/`. The package
+was released together with https://arxiv.org/abs/2107.11775 and used therein.
 For mathematical details and physics background please refer to
-https://arxiv.org/abs/2107.11775 and https://doi.org/10.1103/PhysRevX.10.011008.
+https://doi.org/10.11588/heidok.00030671 and https://doi.org/10.1103/PhysRevX.10.011008.
 
