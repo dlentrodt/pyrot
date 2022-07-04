@@ -35,8 +35,8 @@ A detailed documentation is currently not available and will be added at a
 later time. The current main documentation is given in form of explanatory jupyter notebooks,
 which can be found in `demo/`.
 
-As short documentation on the underlying algorithms, mathematical details and physics background
-is given in the following:
+As a short documentation on the underlying algorithms, mathematical details and physics background
+is given in the following resources:
 - **Parratt's formalism** is particularly known from x-ray scattering on thin films.
 It essentially solves Maxwell's equations for a stack of layers with a given refractive index.
 The formalism works recursively by adding up all the paths between the layer interfaces, whose response

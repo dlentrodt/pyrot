@@ -62,8 +62,8 @@ class CavityAtoms1d(Cavity1d):
 
     def linear_reflection_coefficient(self, omega, input_from_right=False, zero_offset=0.0, formula_option='Full'):
         if input_from_right:
-            return self.linear_scattering_matrix(omega, zero_offset=zero_offset, formula_option=formula_option)[1,0]
-        return self.linear_scattering_matrix(omega, zero_offset=zero_offset, formula_option=formula_option)[0,1] # TODO: check order
+            return self.linear_scattering_matrix(omega, zero_offset=zero_offset, formula_option=formula_option)[0,1]
+        return self.linear_scattering_matrix(omega, zero_offset=zero_offset, formula_option=formula_option)[1,0]
 
     def linear_reflection_intensity(self, omega, input_from_right=False, zero_offset=0.0, formula_option='Full'):
         return np.abs(self.linear_reflection_coefficient(omega, input_from_right=input_from_right, zero_offset=zero_offset, formula_option=formula_option))**2
@@ -72,7 +72,7 @@ class CavityAtoms1d(Cavity1d):
         N, T, _ = linear_dispersion_scattering_multi_atom(omega, self.n, self.t, self.atoms_params, phase_zero_offset=-omega*zero_offset, formula_option=formula_option)
         return N, T
 
-    def draw_cav(self, depth):
+    def draw_cav(self, depth, loc=4):
         N_depth = self.n_depth(depth)
 
         plt.figure()
@@ -84,7 +84,7 @@ class CavityAtoms1d(Cavity1d):
         for atom_params in self.atoms_params:
             plt.axvline(atom_params[0], color='k', dashes=[3,3], lw=1.0, label='atom position')
         plt.autoscale(enable=True, axis='x', tight=True)
-        plt.legend(loc=4,fontsize=8)
+        plt.legend(loc=loc,fontsize=8)
         plt.show()
 
 ################################################################################

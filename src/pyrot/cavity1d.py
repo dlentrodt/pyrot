@@ -78,8 +78,8 @@ class Cavity1d():
 
     def reflection_coefficient(self, omega, input_from_right=False, zero_offset=0.0):
         if input_from_right:
-            return self.scattering_matrix(omega, zero_offset=zero_offset)[1,0]
-        return self.scattering_matrix(omega, zero_offset=zero_offset)[0,1] # TODO: check order
+            return self.scattering_matrix(omega, zero_offset=zero_offset)[0,1]
+        return self.scattering_matrix(omega, zero_offset=zero_offset)[1,0]
 
     def reflection_intensity(self, omega, input_from_right=False, zero_offset=0.0):
         return np.abs(self.reflection_coefficient(omega, input_from_right=input_from_right, zero_offset=zero_offset))**2
@@ -96,7 +96,7 @@ class Cavity1d():
         return GF(z1, z2, self, Theta, omega)
 
 
-    def draw_cav(self, depth):
+    def draw_cav(self, depth, loc=4):
         N_depth = self.n_depth(depth)
 
         plt.figure()
@@ -106,7 +106,7 @@ class Cavity1d():
         plt.plot(depth, np.real(N_depth), '-', label='Re[N]')
         plt.plot(depth, np.imag(N_depth), '-', label='Im[N]')
         plt.autoscale(enable=True, axis='x', tight=True)
-        plt.legend(loc=4,fontsize=8)
+        plt.legend(loc=loc,fontsize=8)
         plt.show()
 
 ################################################################################
@@ -217,7 +217,7 @@ def j_from_z(z, cav): # z in [L]
     given the total depth z and a cavity cav.
         - j=0 corresponds to the first layer (vacuum in pynuss) where z<0.
           The distance to the upper layer boundary is not defined in this case
-          and given as -z (TODO: check if field formula applies in this region)
+          and given as -z (TODO: implement output interface for fields and check if field formula applies in outside region)
         - j=1 is the first layer, with layer boundary position z_1 = 0
         - j=2 is the second layer, with layer boundary position z_2 = t_1
           (t_1: thickness of the first layer)
@@ -279,7 +279,7 @@ def beta_j(j, N, T, Theta, omega):
 
 def D_j_i_k(j, i, k, N, T, Theta, omega, pol='s'):
     betaj = beta_j(j, N, T, Theta, omega)
-    dj = T[j] # [m] TODO: units
+    dj = T[j] # [m]
     rj_i = r_i_j(j, i, N, T, Theta, omega, pol=pol)
     rj_k = r_i_j(j, k, N, T, Theta, omega, pol=pol)
     return 1. - rj_i*rj_k*np.exp(2.j*betaj*dj)
@@ -312,7 +312,7 @@ def t_ij(i, j, N, T, Theta, omega, pol='s'):
 def r_i_j_k(i, j, k, N, T, Theta, omega, pol='s'):
     ### recurrence relation ###
     betaj = beta_j(j, N, T, Theta, omega)
-    dj = T[j] # [m] TODO: units
+    dj = T[j] # [m]
     Dj = D_j_i_k(j, i, k, N, T, Theta, omega, pol=pol)
     ri_j = r_i_j(i, j, N, T, Theta, omega, pol=pol)
     rj_i = r_i_j(j, i, N, T, Theta, omega, pol=pol)
