@@ -17,7 +17,6 @@ __pycache__/
 *.bbl
 *.synctex.gz
 *.out
-*.pdf
 *.ps
 *.dvi
 *.tex~
