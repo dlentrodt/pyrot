@@ -49,7 +49,8 @@ package deals with normal incidence only (for now) and polarization is ignored (
 frequency dependent refractive index. This simplification is possible at *weak excitation*, where the
 level schemes behave like classical oscillators, such that the *response is linear in the
 excitation field*. It relies on the approximation $\langle\sigma^-(t)\rangle\approx-1$ or similar formulations.
-[see e.g. https://doi.org/10.1103/PhysRevLett.64.2499, https://doi.org/10.1103/PhysRevA.93.012120, https://doi.org/10.1103/PhysRevX.10.011008]
+[see e.g. https://doi.org/10.1103/PhysRevLett.64.2499, https://doi.org/10.1103/PhysRevA.93.012120, https://doi.org/10.1103/PhysRevX.10.011008,
+https://doi.org/10.1103/PhysRevResearch.2.023396]
 - The classical electromagnetic **Green's tensor** is defined by the equation
 $$[\nabla\times\nabla\times - \frac{\omega^2}{c^2} \varepsilon(\mathbf{r}, \omega)] \mathbf{G}(\mathbf{r}, \mathbf{r}', \omega) = \delta(\mathbf{r} - \mathbf{r}') \,,$$
 Here, we consider the 1D special case, which can be considered the normal incidence component of a layer stack in Fourier space
