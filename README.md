@@ -58,7 +58,7 @@ excitation field*. It relies on the approximation $\langle\hat{a}(t)\hat{\sigma}
 https://doi.org/10.1103/PhysRevResearch.2.023396]
 - The classical electromagnetic **Green's tensor** is defined by the equation
 $$[\nabla\times\nabla\times - \frac{\omega^2}{c^2} \varepsilon(\mathbf{r}, \omega)] \mathbf{G}(\mathbf{r}, \mathbf{r}', \omega) = \delta(\mathbf{r} - \mathbf{r}') \,,$$
-Here, we consider the 1D special case, which can be considered the normal incidence component of a layer stack in Fourier space
+Here, we consider the 1D special case, which can be regarded the normal incidence component of a layer stack in Fourier space
 and is available analytically via a recursive algorithm [https://doi.org/10.1103/PhysRevA.51.2545].
 - The Green's function can e.g. be used to set up Markovian Master equations for the atom ensemble in the weak coupling limit. [see https://arxiv.org/abs/0902.3586]
 
