@@ -17,6 +17,10 @@ Note that this software and its algorithms are mainly designed with the goal
 of transparent physics and to illustrate theoretical concepts. It is *not*
 designed for realistic practical applications or numerical efficiency.
 
+<p align="center">
+  <img src="https://github.com/dlentrodt/pyrot/blob/master/images/illu_readme.png" />
+</p>
+
 Installation
 ------------
 
@@ -34,10 +38,6 @@ Documentation
 A detailed documentation is currently not available and will be added at a
 later time. The current main documentation is given in form of explanatory jupyter notebooks,
 which can be found in `demo/`.
-
-<p align="center">
-  <img src="https://github.com/dlentrodt/pyrot/blob/master/images/illu_readme.png" />
-</p>
 
 
 As a short documentation on the underlying algorithms, mathematical details and physics background
