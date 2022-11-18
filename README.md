@@ -12,7 +12,6 @@ Currently, it implements the following features:
 - Calculation of the cavity **Green's function** via a recursive algorithm.
 - Via the Green's function, one can set up **Markovian Master equations** for the atom ensemble at weak light-matter coupling.
 
-
 Note that this software and its algorithms are mainly designed with the goal
 of transparent physics and to illustrate theoretical concepts. It is *not*
 designed for realistic practical applications or numerical efficiency.

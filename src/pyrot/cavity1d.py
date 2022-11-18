@@ -53,11 +53,11 @@ class Cavity1d():
         layer_counter = 0
         for i, d_ in enumerate(depth):
             if layer_counter == 0:
-                N_depth[i] = 1.0 + 0.0j
+                N_depth[i] = N[layer_counter]
                 if d_>0:
                     layer_counter += 1
             elif layer_counter == len(N)-1:
-                N_depth[i] = 1.0 + 0.0
+                N_depth[i] = N[layer_counter]
             else:
                 if d_>np.sum(T[1:layer_counter+1]):
                     layer_counter += 1
@@ -271,11 +271,24 @@ def Εs_n(z, cav, Theta, omega):
         Field[i] = ts_nj*np.exp(1j*betaj*dj)/Dsj * ( np.exp(-1j*betaj*zm) +  rs_j0*np.exp(+1j*betaj*zm) )
     return z, Field
 
-def beta_j(j, N, T, Theta, omega):
+def beta_j(j, N, T, Theta, omega, speedup=False):
     k = omega # [1/L]
     k_parallel = k*np.cos(Theta) # [1/L]
     betaj = np.sqrt(N[j]**2*k**2-k_parallel**2)
-    return betaj # [1/L]
+    if speedup:
+        return betaj
+        """ Does not give globally analytic Green's function in the complex omega plane.
+            Works for Im[k]=0 though, likely even for all Re[k]>0.
+        """
+    k_re = np.real(k)
+    sign_fact = np.sign(k_re) + (k_re == 0)
+    """ Chooses the sign of the square root such that the Green's function is analytic everywhere except at its
+        poles. Without this factor, it is only analytic for Re[k]>0.
+        Hopefully this prescription works for all cases, I've only tested a few... choosing the correct Riemann
+        sheet point-wise for global analyticity is non-trivial. The resulting Green's function is certainly
+        correct for Im[k] = 0 though.
+    """
+    return betaj * sign_fact # [1/L]
 
 def D_j_i_k(j, i, k, N, T, Theta, omega, pol='s'):
     betaj = beta_j(j, N, T, Theta, omega)
