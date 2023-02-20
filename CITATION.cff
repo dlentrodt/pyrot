@@ -1,0 +1,9 @@
+cff-version: 0.0.0
+message: "If you use this software, please cite it as below and along with the paper https://arxiv.org/abs/2107.11775."
+authors:
+  - family-names: Lentrodt
+    given-names: Dominik
+    orcid: https://orcid.org/0000-0001-7400-9575
+title: "pyrot"
+version: 0.0.0
+date-released: 2022-07-07
