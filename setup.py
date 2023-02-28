@@ -7,7 +7,7 @@ package_data = dict(pyrot=['*.py',
 
 if __name__ == "__main__":
       setup(name='pyrot',
-            version='0.0.0',
+            version='0.0.1',
             author='Dominik Lentrodt',
             author_email='dominik@lentrodt.com',
             license='GPLv3',

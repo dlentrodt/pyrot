@@ -46,3 +46,4 @@ lib64
 
 # specific tests
 demo/_test.ipynb
+_create_release.sh
