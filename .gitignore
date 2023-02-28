@@ -43,3 +43,6 @@ lib64
 
 # Bash script for copying illustration figures
 .copy-illu.sh
+
+# specific tests
+demo/_test.ipynb
